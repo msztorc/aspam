@@ -1,0 +1,199 @@
+<?php
+
+/**
+ * @file
+ * Uses the aspam technique to improve the CAPTCHA system.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aspam_help($path, $arg)
+{
+    switch ($path) {
+    case 'admin/config/people/captcha/aspam':
+      return '<p>'.t('Yet another spam protection').'</p>';
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function aspam_menu()
+{
+    $items = array();
+    $items['admin/config/people/captcha/aspam'] = array(
+    'title' => 'aspam',
+    'description' => 'Administer the aspam module.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('aspam_admin_settings'),
+    'access arguments' => array('administer aspam'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'aspam.admin.inc',
+  );
+
+    return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function aspam_permission()
+{
+    return array(
+    'administer aspam' => array(
+      'title' => t('aspam Administration'),
+      'description' => t('Administer aspam settings'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_captcha().
+ */
+function aspam_captcha()
+{
+    $args = func_get_args();
+    $op = array_shift($args);
+    switch ($op) {
+    case 'list':
+      return array('aspam');
+
+    case 'generate':
+      $captcha_type = array_shift($args);
+      $captcha = array();
+
+      if ($captcha_type == 'aspam') {
+          $aspam_options = array(
+          'basePath' => drupal_get_path('module', 'aspam'),
+          'width' => variable_get('aspam_width', 150),
+          'height' => variable_get('aspam_height', 150),
+          'numChars' => variable_get('aspam_length', 6),
+          'transformTime' => variable_get('aspam_ttime', 1000),
+          'showTime' => variable_get('aspam_wtime', 1500),
+          'backgroundColor' => variable_get('aspam_backgroudcolor', '#5BAE09'),
+          'borderColor' => variable_get('aspam_bordercolor', '#4F9607'),
+          'borderWidth' => variable_get('aspam_borderwidth', 1),
+          'charColor' => variable_get('aspam_chcolor', '#5BAE09'),
+          'fillOpacity' => variable_get('aspam_flopacity', 0.8),
+          'charStrokeColor' => variable_get('aspam_chstroke', '#82F211'),
+          'charStrokeWidth' => variable_get('aspam_chswidth', 2),
+          'charWidthScale' => variable_get('aspam_chwsize', 1.0),
+          'charHeightScale' => variable_get('aspam_chhsize', 1.0),
+          'padlockOpacity' => variable_get('aspam_padlockopacity', 0.3),
+          'padlockFillColor' => variable_get('aspam_padlockfillcolor', '#000000'),
+          'paddingLeft' => variable_get('aspam_paddingleft', 'auto'),
+          'paddingTop' => variable_get('aspam_paddingtop', 'auto'),
+          'symbols' => variable_get('aspam_symbols', 'lowercase|uppercase|digits'),
+          'encryption' => variable_get('aspam_rsa_encryption', false),
+          'publicKey' => variable_get('aspam_pem_public_key', ''),
+        );
+
+        // Construct the Javascript, but only display it once.
+        static $_aspam_jsadded = false;
+          if ($_aspam_jsadded == false) {
+              $_aspam_jsadded = true;
+
+          // Set the default tab index.
+          if (!empty($aspam_tabindex)) {
+              $aspam_options['tabindex'] = $aspam_tabindex;
+          }
+          }
+
+          $captcha['solution'] = true;
+          $captcha['captcha_validate'] = 'aspam_captcha_validation';
+
+          $captcha['form']['captcha_response'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Enter chars below'),
+            '#size' => 20,
+            '#default_value' => '',
+            '#maxlength' => 128,
+            '#required' => true,
+            '#value' => '',
+          );
+
+          $captcha['form']['aspam_chash'] = array(
+            '#type' => 'hidden',
+            '#id' => 'aspam_chash',
+            //'#access' => true,
+            '#value' => '',
+          );
+
+          $aspam_custom_html = '<div id="aspam">
+                                  <div id="aspam-padlock"></div>
+                                  <div id="aspam-holder"></div>
+                                  <span style="font-size:9px;"><b>Aspam</b></span>
+                                </div>';
+
+          $aspam_custom_html .= '
+          <script>
+            if (jQuery("#aspam").length > 0) {
+
+              jQuery.spam.aspam( '.drupal_json_encode($aspam_options).', "#aspam" );
+            }
+          </script>';
+
+          $captcha['form']['aspam_form'] = array(
+            '#type' => 'item',
+            '#markup' => '<div id="aspam_container" style="overflow: hidden; position: relative;">'.$aspam_custom_html.'</div>',
+          );
+      }
+
+      return $captcha;
+  }
+}
+
+function aspam_init()
+{
+    drupal_add_library('system', 'ui.widget');
+
+  //rsa encryption enabled
+  if (variable_get('aspam_rsa_encryption', false)) {
+      drupal_add_js(drupal_get_path('module', 'aspam').'/lib/jsencrypt/jsencrypt-all.js');
+  }
+
+    drupal_add_js(drupal_get_path('module', 'aspam').'/lib//raphael/raphael-min.js');
+    drupal_add_js(drupal_get_path('module', 'aspam').'/lib/crypto-js/md5.js');
+
+    drupal_add_js(drupal_get_path('module', 'aspam').'/fonts/helvetica.js');
+    drupal_add_js(drupal_get_path('module', 'aspam').'/js/aspam.js');
+}
+
+/**
+ * CAPTCHA Callback; Validates the aspam code.
+ */
+function aspam_captcha_validation($solution = null, $response = null)
+{
+    $ip_address = ip_address();
+
+    if ($ip_address && !empty($_POST['captcha_response']) && !empty($_POST['aspam_chash'])) {
+        $vhash = ''; //verify hash
+
+    $cres = $_POST['captcha_response'];
+
+        for ($i = 0; $i < strlen($cres); ++$i) {
+            $vhash = (ord($cres[$i]) % 2 == 0)
+        ? md5($vhash.$cres[$i].ord($cres[$i]))
+        : md5($vhash.ord($cres[$i]));
+        }
+
+        if (variable_get('aspam_rsa_encryption', false)) {
+            $pk = openssl_get_privatekey(variable_get('aspam_pem_private_key', ''));
+
+            openssl_private_decrypt(base64_decode($_POST['aspam_chash']), $chash, $pk);
+        } else {
+            $chash = $_POST['aspam_chash'];
+        }
+
+        if ($vhash == $chash) {
+            $resp = true;
+        } else {
+            $resp = false;
+        }
+
+        return $resp;
+    }
+
+    return false;
+}

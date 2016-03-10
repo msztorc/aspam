@@ -1,0 +1,13 @@
+name = "Aspam"
+description = "Yet another spam protection."
+package = "Spam control"
+
+dependencies[] = captcha
+# dependencies[] = raphael
+dependencies[] = jquery_update
+
+version = "7.x-2.0"
+core = "7.x"
+project = "aspam"
+configure = admin/config/people/captcha/aspam
+datestamp = "1396349362"
