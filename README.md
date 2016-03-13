@@ -1,6 +1,8 @@
 # Aspam
 Spam protection with challenge - jQuery widget
 
+Aspam is a challenge-response test for web forms to determine whether the user is human. Aspam offer the new idea of challenge-response test to block form submissions by spambots and automated scripts.
+
 ![alt text](http://sztorc.com/aspam/aspam-captcha.gif "Aspam")
 
 # Requirements
@@ -21,7 +23,10 @@ Visit http://your.site/admin/config/people/captcha/aspam to configure Aspam modu
 You have to configure also CAPTCHA module on http://your.site/admin/config/people/captcha. 
 You should change CHALLENGE TYPE to "aspam" for any form you want. 
 
-## Client side
+
+## Normal installation
+
+### Client side
 
 ```html
 <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
@@ -75,7 +80,7 @@ jQuery.spam.aspam( {
 	"publicKey":"-----BEGIN PUBLIC KEY-----\r\nMIGfMA0...\r\n-----END PUBLIC KEY-----"
 	}, "#aspam" );
 ```
-## Server side
+### Server side
 
 PHP (validation)
 ```php
@@ -124,7 +129,7 @@ if ($ip_address && !empty($_POST['captcha_response']) && !empty($_POST['aspam_ch
 
 ```
 
-## Generate certificates for encryption support
+### Generate certificates for encryption support
 
 ##### Generate private key
 
