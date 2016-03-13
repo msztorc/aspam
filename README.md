@@ -1,12 +1,25 @@
 # Aspam
 Spam protection with challenge - jQuery widget
 
+![alt text](http://sztorc.com/aspam/aspam-captcha.gif "Aspam")
+
 # Requirements
+- jQuery
 - Raphaël 2.x JavaScript Vector Library by Dmitry Baranovskiy & Sencha Labs
 - CryptoJS (MD5) by Jeff Mott
 - jsEncrypt by AllPlayers.com - optional
 
 # Installation & usage
+
+## Drupal 7 module available
+Required [CAPTCHA](https://www.drupal.org/project/captcha) module.
+
+Clone this repository to /DRUPAL_PATH/sites/all/modules/aspam or /DRUPAL_PATH/sites/SITENAME/modules/aspam and go to http://your.site/admin/modules to install Aspam module.
+
+Visit http://your.site/admin/config/people/captcha/aspam to configure Aspam module.
+
+You have to configure also CAPTCHA module on http://your.site/admin/config/people/captcha. 
+You should change CHALLENGE TYPE to "aspam" for any form you want. 
 
 ## Client side
 
