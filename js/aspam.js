@@ -1,7 +1,7 @@
 /*
  * jQuery Aspam - Spam protection plugin
  *
- * Copyright 2016, Mirosław Sztorc
+ * Copyright 2015-2016, Mirosław Sztorc
  * http://sztorc.com
  *
  * Licensed under the MIT license:
@@ -40,7 +40,7 @@
             paddingLeft: 'auto',
             paddingTop: 'auto',
             symbols: 'lowercase|uppercase|digits',
-            encryption: false, //if true require JSEncrypt
+            encryption: false, // If true require JSEncrypt
             publicKey: ''
 
         },
@@ -55,7 +55,7 @@
             selfie = this;
 
             this.r = Raphael("aspam-holder", this.options.width, this.options.height);
-            //selfie.letter = this.r.path("M0,0L0,0z").attr({fill: "#5BAE09", stroke: "#fff", "fill-opacity": 1, "stroke-width": 1, "stroke-linecap": "round", translation: "100 100"});
+            // selfie.letter = this.r.path("M0,0L0,0z").attr({fill: "#5BAE09", stroke: "#fff", "fill-opacity": 1, "stroke-width": 1, "stroke-linecap": "round", translation: "100 100"});
             selfie.letter = selfie.r.path("M" + this.options.paddingLeft + "," + this.options.paddingTop + "z")
                 .attr({
                     fill: this.options.charColor,
@@ -64,7 +64,7 @@
                     "stroke-width": this.options.charStrokeWidth,
                     "stroke-linecap": "round"
                 });
-            //selfie.letter.attr({pathXY: [210,300]});
+            // selfie.letter.attr({pathXY: [210,300]});
 
             this.element.width(this.options.width);
 
@@ -85,13 +85,13 @@
                     top: 0,
                     left: 0,
                     zIndex: 10000
-                    /*lineHeight: this.options.height + 'px' */
+                    /* lineHeight: this.options.height + 'px' */
                 })
                 .html(img).fadeTo('fast', 1)
                 .click(function() {
 
                     var left = selfie.se.offset().left;
-                    //se.css({left:left}).animate({"left":"0px"}, "slow");
+                    // se.css({left:left}).animate({"left":"0px"}, "slow");
 
                     selfie.se.fadeOut('normal');
 
@@ -116,7 +116,7 @@
         },
         _charRand: function() {
 
-            var lchars = 'abcdefghijklmnopqrstuvwxyz'; // o is omitted, because is similar to 0
+            var lchars = 'abcdefghijklmnpqrstuvwxyz'; // o is omitted, because is similar to 0
             var uchars = 'ABCDEFGHIJKLMPQRSTUVWXYZ'; // O is omitted, because is similar to 0
             var digits = '123456789'; // 0 is omittet, because is similar to O
 
@@ -200,6 +200,7 @@
             }
 
         }
+        
     });
 
 })(jQuery);

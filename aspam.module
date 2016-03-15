@@ -116,7 +116,7 @@ function aspam_captcha()
           $captcha['form']['aspam_chash'] = array(
             '#type' => 'hidden',
             '#id' => 'aspam_chash',
-            //'#access' => true,
+            // '#access' => true,
             '#value' => '',
           );
 
@@ -144,20 +144,37 @@ function aspam_captcha()
   }
 }
 
+function aspam_page_build(&$page)
+{
+	drupal_add_library('system', 'ui.widget');
+
+	// RSA encryption enabled
+  if (variable_get('aspam_rsa_encryption', false)) {
+    $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/lib/jsencrypt/jsencrypt-all.js'] = array(
+       'type' => 'file'
+    );    
+  }
+  // Raphael
+  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/lib//raphael/raphael-min.js'] = array(
+     'type' => 'file'
+  ); 
+  // MD5
+  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/lib/crypto-js/md5.js'] = array(
+     'type' => 'file'
+  ); 
+  // Font
+  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/fonts/helvetica.js'] = array(
+     'type' => 'file'
+  );
+  // Aspam 
+  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/js/aspam.js'] = array(
+     'type' => 'file'
+  );
+}
+
 function aspam_init()
 {
-    drupal_add_library('system', 'ui.widget');
 
-  //rsa encryption enabled
-  if (variable_get('aspam_rsa_encryption', false)) {
-      drupal_add_js(drupal_get_path('module', 'aspam').'/lib/jsencrypt/jsencrypt-all.js');
-  }
-
-    drupal_add_js(drupal_get_path('module', 'aspam').'/lib//raphael/raphael-min.js');
-    drupal_add_js(drupal_get_path('module', 'aspam').'/lib/crypto-js/md5.js');
-
-    drupal_add_js(drupal_get_path('module', 'aspam').'/fonts/helvetica.js');
-    drupal_add_js(drupal_get_path('module', 'aspam').'/js/aspam.js');
 }
 
 /**
@@ -168,9 +185,9 @@ function aspam_captcha_validation($solution = null, $response = null)
     $ip_address = ip_address();
 
     if ($ip_address && !empty($_POST['captcha_response']) && !empty($_POST['aspam_chash'])) {
-        $vhash = ''; //verify hash
+        $vhash = '';
 
-    $cres = $_POST['captcha_response'];
+    	$cres = $_POST['captcha_response'];
 
         for ($i = 0; $i < strlen($cres); ++$i) {
             $vhash = (ord($cres[$i]) % 2 == 0)
