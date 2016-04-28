@@ -152,4 +152,4 @@ Copy your private key from file: rsa_1024_pub.pem
 # Copyright and license
 &copy; Copyright Mirosław Sztorc
 
-[MIT License](LICENSE)
+[GPLv2](LICENSE)
