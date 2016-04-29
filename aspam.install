@@ -8,8 +8,7 @@
 /**
  * Implements hook_uninstall().
  */
-function aspam_uninstall()
-{
+function aspam_uninstall() {
     // Delete all the aspam variables and then clear the variable cache
   db_delete('variable')
     ->condition('name', 'aspam_%', 'LIKE')

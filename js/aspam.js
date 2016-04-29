@@ -46,8 +46,14 @@
         },
         _create: function() {
 
-            if (this.options.paddingLeft == 'auto') this.options.paddingLeft = Math.round((this.options.width - (110 * this.options.charWidthScale)) / 2);
-            if (this.options.paddingTop == 'auto') this.options.paddingTop = Math.round((this.options.width - (110 * this.options.charHeightScale)) / 2);
+/*            if (this.options.paddingLeft == 'auto') this.options.paddingLeft = Math.round((this.options.width - (75 * this.options.charWidthScale)));
+            if (this.options.paddingTop == 'auto') this.options.paddingTop = Math.round((this.options.height - (75 * this.options.charHeightScale)));
+
+            this.options.paddingLeft = (this.options.paddingLeft >= 0) ? this.options.paddingLeft : 0; 
+            this.options.paddingTop = (this.options.paddingTop >= 0) ? this.options.paddingTop : 0;
+
+            console.log('this.options.paddingLeft: ' + this.options.paddingLeft);
+            console.log('this.options.paddingTop: ' + this.options.paddingTop);*/
 
             //padlock
             var img = '<div id="aspam-padlock" style="width:' + this.options.width + 'px; height:' + this.options.height + 'px;"></div>';
@@ -56,16 +62,16 @@
 
             this.r = Raphael("aspam-holder", this.options.width, this.options.height);
             // selfie.letter = this.r.path("M0,0L0,0z").attr({fill: "#5BAE09", stroke: "#fff", "fill-opacity": 1, "stroke-width": 1, "stroke-linecap": "round", translation: "100 100"});
-            selfie.letter = selfie.r.path("M" + this.options.paddingLeft + "," + this.options.paddingTop + "z")
+            selfie.letter = selfie.r.path("M0,0z")
                 .attr({
                     fill: this.options.charColor,
                     stroke: this.options.charStrokeColor,
                     "fill-opacity": this.options.fillOpacity,
                     "stroke-width": this.options.charStrokeWidth,
                     "stroke-linecap": "round"
-                });
-            // selfie.letter.attr({pathXY: [210,300]});
-
+                })
+                .translate(0,0);
+ 
             this.element.width(this.options.width);
 
             selfie.se = this.element.find('#aspam-padlock')
@@ -179,11 +185,20 @@
 
                 var key = this._charRand();
 
+
                 if (key && key in helvetica) {
-                    selfie.letter.animate({
+
+
+                    if (this.options.paddingLeft == 'auto') this.options.paddingLeft = Math.round((this.options.width-(110*this.options.charWidthScale))/2);
+                    if (this.options.paddingTop == 'auto') this.options.paddingTop = Math.round((this.options.height-(110*this.options.charHeightScale))/2);
+
+                    var anim = Raphael.animation({
+                        transform: "s" + this.options.charWidthScale + "," + this.options.charHeightScale + ","+this.options.paddingLeft+","+this.options.paddingTop,
                         path: helvetica[key],
-                        transform: "s" + this.options.charWidthScale + ", " + this.options.charHeightScale + ", " + this.options.paddingLeft + ", " + this.options.paddingTop
                     }, this.options.transformTime);
+
+                    selfie.letter.animate(anim);
+
                 }
 
                 this._i++;

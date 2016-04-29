@@ -8,19 +8,17 @@
 /**
  * Implements hook_help().
  */
-function aspam_help($path, $arg)
-{
-    switch ($path) {
+function aspam_help($path, $arg) {
+  switch ($path) {
     case 'admin/config/people/captcha/aspam':
-      return '<p>'.t('Yet another spam protection').'</p>';
+      return '<p>' . t('Yet another spam protection') . '</p>';
   }
 }
 
 /**
  * Implements hook_menu().
  */
-function aspam_menu()
-{
+function aspam_menu() {
     $items = array();
     $items['admin/config/people/captcha/aspam'] = array(
     'title' => 'aspam',
@@ -38,8 +36,7 @@ function aspam_menu()
 /**
  * Implements hook_permission().
  */
-function aspam_permission()
-{
+function aspam_permission() {
     return array(
     'administer aspam' => array(
       'title' => t('aspam Administration'),
@@ -51,8 +48,7 @@ function aspam_permission()
 /**
  * Implements hook_captcha().
  */
-function aspam_captcha()
-{
+function aspam_captcha() {
     $args = func_get_args();
     $op = array_shift($args);
     switch ($op) {
@@ -90,9 +86,9 @@ function aspam_captcha()
         );
 
         // Construct the Javascript, but only display it once.
-        static $_aspam_jsadded = false;
-          if ($_aspam_jsadded == false) {
-              $_aspam_jsadded = true;
+        static $aspam_jsadded = false;
+          if ($aspam_jsadded == false) {
+              $aspam_jsadded = true;
 
           // Set the default tab index.
           if (!empty($aspam_tabindex)) {
@@ -130,13 +126,13 @@ function aspam_captcha()
           <script>
             if (jQuery("#aspam").length > 0) {
 
-              jQuery.spam.aspam( '.drupal_json_encode($aspam_options).', "#aspam" );
+              jQuery.spam.aspam(' . drupal_json_encode($aspam_options) . ', "#aspam" );
             }
           </script>';
 
           $captcha['form']['aspam_form'] = array(
             '#type' => 'item',
-            '#markup' => '<div id="aspam_container" style="overflow: hidden; position: relative;">'.$aspam_custom_html.'</div>',
+            '#markup' => '<div id="aspam_container" style="overflow: hidden; position: relative;">' . $aspam_custom_html . '</div>',
           );
       }
 
@@ -144,62 +140,59 @@ function aspam_captcha()
   }
 }
 
-function aspam_page_build(&$page)
-{
-	drupal_add_library('system', 'ui.widget');
+function aspam_page_build(&$page) {
+    drupal_add_library('system', 'ui.widget');
 
-	// RSA encryption enabled
+    // RSA encryption enabled
   if (variable_get('aspam_rsa_encryption', false)) {
-    $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/lib/jsencrypt/jsencrypt-all.js'] = array(
-       'type' => 'file'
-    );    
+      $page['content']['#attached']['js'][drupal_get_path('module', 'aspam') . '/lib/jsencrypt/jsencrypt-all.js'] = array(
+       'type' => 'file',
+    );
   }
   // Raphael
-  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/lib//raphael/raphael-min.js'] = array(
-     'type' => 'file'
-  ); 
+  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam') . '/lib//raphael/raphael-min.js'] = array(
+     'type' => 'file',
+  );
   // MD5
-  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/lib/crypto-js/md5.js'] = array(
-     'type' => 'file'
-  ); 
+  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam') . '/lib/crypto-js/md5.js'] = array(
+     'type' => 'file',
+  );
   // Font
-  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/fonts/helvetica.js'] = array(
-     'type' => 'file'
+  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam') . '/fonts/helvetica.js'] = array(
+     'type' => 'file',
   );
   // Aspam 
-  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam').'/js/aspam.js'] = array(
-     'type' => 'file'
+  $page['content']['#attached']['js'][drupal_get_path('module', 'aspam') . '/js/aspam.js'] = array(
+     'type' => 'file',
   );
 }
 
-function aspam_init()
-{
-
+function aspam_init() {
 }
 
 /**
  * CAPTCHA Callback; Validates the aspam code.
  */
-function aspam_captcha_validation($solution = null, $response = null)
-{
+function aspam_captcha_validation($solution = null, $response = null) {
     $ip_address = ip_address();
 
     if ($ip_address && !empty($_POST['captcha_response']) && !empty($_POST['aspam_chash'])) {
         $vhash = '';
 
-    	$cres = $_POST['captcha_response'];
+        $cres = $_POST['captcha_response'];
 
         for ($i = 0; $i < strlen($cres); ++$i) {
             $vhash = (ord($cres[$i]) % 2 == 0)
-        ? md5($vhash.$cres[$i].ord($cres[$i]))
-        : md5($vhash.ord($cres[$i]));
+        ? md5($vhash . $cres[$i] . ord($cres[$i]))
+        : md5($vhash . ord($cres[$i]));
         }
 
         if (variable_get('aspam_rsa_encryption', false)) {
             $pk = openssl_get_privatekey(variable_get('aspam_pem_private_key', ''));
 
             openssl_private_decrypt(base64_decode($_POST['aspam_chash']), $chash, $pk);
-        } else {
+        } 
+        else {
             $chash = $_POST['aspam_chash'];
         }
 
